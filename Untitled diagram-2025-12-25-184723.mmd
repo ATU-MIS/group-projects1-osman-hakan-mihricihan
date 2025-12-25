@@ -1,0 +1,93 @@
+sequenceDiagram
+    title Bitki Takip Sistemi - Bitki Ekleme ve Bakım Süreci
+
+    participant Kullanıcı
+    participant User as Kullanıcı Sınıfı
+    participant Plant as Bitki Sınıfı
+    participant Watering as SulamaTakvimi Sınıfı
+    participant Fertilizing as GubrelemeTakvimi Sınıfı
+    participant Maintenance as BakimGecmisi Sınıfı
+    participant Notification as Bildirim Sınıfı
+    participant Report as Rapor Sınıfı
+
+    %% Bitki Ekleme Süreci
+    Note over Kullanıcı,Report: Bitki Ekleme Süreci
+    Kullanıcı->>User: bitkiEkle() çağrısı
+    activate User
+    User->>Plant: Yeni Bitki oluştur
+    activate Plant
+    Plant->>Watering: Sulama takvimi oluştur
+    activate Watering
+    Watering-->>Plant: Takvim ID
+    deactivate Watering
+    Plant->>Fertilizing: Gübreleme takvimi oluştur
+    activate Fertilizing
+    Fertilizing-->>Plant: Takvim ID
+    deactivate Fertilizing
+    Plant-->>User: Bitki ID
+    deactivate Plant
+    User->>Notification: Bildirim ayarla (yeni bitki)
+    activate Notification
+    Notification-->>User: Bildirim ID
+    deactivate Notification
+    User-->>Kullanıcı: Bitki başarıyla eklendi
+    deactivate User
+
+    %% Sulama Yapma Süreci
+    Note over Kullanıcı,Report: Sulama Yapma Süreci
+    Kullanıcı->>User: bakimEkle() çağrısı (sulama)
+    activate User
+    User->>Plant: sulamaYap() çağrısı
+    activate Plant
+    Plant->>Watering: sulamaUyarisiHesapla()
+    activate Watering
+    Watering-->>Plant: Sonraki sulama tarihi
+    deactivate Watering
+    Plant->>Maintenance: Yeni bakım kaydı (sulama)
+    activate Maintenance
+    Maintenance-->>Plant: Bakım ID
+    deactivate Maintenance
+    Note right of Plant: sonSulama güncelle
+    Plant-->>User: Sulama tamamlandı
+    deactivate Plant
+    User->>Notification: bildirimGonder() (sulama yapıldı)
+    activate Notification
+    Notification-->>User: OK
+    deactivate Notification
+    User-->>Kullanıcı: Sulama kaydedildi
+    deactivate User
+
+    %% Bakım Geçmişi Görüntüleme
+    Note over Kullanıcı,Report: Bakım Geçmişi Görüntüleme
+    Kullanıcı->>User: bakimEkle() çağrısı (geçmiş)
+    activate User
+    User->>Plant: bakimGecmisiGetir()
+    activate Plant
+    Plant->>Maintenance: bakimKaydet() verilerini getir
+    activate Maintenance
+    Maintenance-->>Plant: Bakım geçmişi listesi
+    deactivate Maintenance
+    Plant-->>User: Bakım geçmişi
+    deactivate Plant
+    User-->>Kullanıcı: Bakım geçmişi göster
+    deactivate User
+
+    %% Rapor Oluşturma Süreci
+    Note over Kullanıcı,Report: Rapor Oluşturma Süreci
+    Kullanıcı->>User: bitkiEkle() çağrısı (rapor)
+    activate User
+    User->>Report: raporOlustur()
+    activate Report
+    Report->>Plant: Bitki verilerini getir
+    activate Plant
+    Plant-->>Report: Bitki bilgileri
+    deactivate Plant
+    Report->>Maintenance: Bakım verilerini getir
+    activate Maintenance
+    Maintenance-->>Report: Bakım kayıtları
+    deactivate Maintenance
+    Note right of Report: veriAnaliziYap()
+    Report-->>User: Rapor içeriği
+    deactivate Report
+    User-->>Kullanıcı: Rapor oluşturuldu
+    deactivate User
